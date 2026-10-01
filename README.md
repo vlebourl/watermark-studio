@@ -12,7 +12,17 @@ Pour publier une version, mettre à jour `version` dans `package.json` et `packa
 
 Développement avec Node.js 22 : `npm ci`, `npm test`, `npm start`. Installer localement les formats de distribution avec `npm run dist` sur le système cible (ou `npm run dist -- --win --x64`, `--linux --x64`, `--mac --arm64`). `npm run pack` garde le mode dossier destiné aux essais locaux.
 
-Dans **La signature**, le bouton **Inverser les couleurs** transforme notamment une signature blanche en noire, sans modifier sa transparence, sa taille ou son placement. **Rétablir les couleurs** revient aux couleurs du PNG d’origine. Le choix est sauvegardé pour la photo courante et utilisé dans l’aperçu et à l’export. Une modification manuelle exige une nouvelle validation ; les fichiers source restent intacts.
+Dans le panneau de placement à droite, **Inverser les couleurs** transforme notamment une signature blanche en noire, sans modifier sa transparence, sa taille ou son placement. Le choix est sauvegardé pour la photo courante et utilisé dans l’aperçu et à l’export. Une modification manuelle exige une nouvelle validation ; les fichiers source restent intacts.
+
+## Éditeur unifié — changements en cours
+
+Le panneau de droite regroupe le placement individuel et son application au lot filtré : références gauche/droite et haut/bas, marges et largeur éditables en pixels et en pourcentage, inversion et opacité. Les deux unités restent synchronisées. Pour le lot, choisir des proportions adaptées aux dimensions de chaque photo ou des valeurs fixes en pixels. Les photos exclues par les filtres restent inchangées.
+
+Déplacer le watermark sur la photo ou tirer l’une des quatre poignées pour le redimensionner en conservant son ratio et le coin opposé. Le magnétisme facilite le centrage horizontal et vertical et l’alignement aux bords ou aux coins. Un cadre invisible ajoute une marge identique sur chaque bord : **24 pixels par défaut**, réglables en pixels ou en pourcentage du petit côté de la photo. Des guides apparaissent pendant le déplacement ; ni les guides ni le cadre ne sont exportés. Maintenir **Alt** suspend le magnétisme ; une case permet de le désactiver pour la photo.
+
+**Entrée** valide le placement puis passe à la photo suivante de la sélection filtrée. Sur la dernière photo, la validation reste sur place. Le bouton de validation permet de valider sans avancer.
+
+Vérification de ce parcours : `npx electron scripts/placement-controls-smoke.cjs`, avec session isolée, déplacements et redimensionnement réels, filtres, lot dans les deux unités, magnétisme et export sans appel à l’IA.
 
 ## Nouveautés v0.6 : galerie et placement manuel du lot
 
@@ -110,7 +120,7 @@ La session est sauvegardée automatiquement dans le répertoire utilisateur Elec
 - Profil ICC et métadonnées conservés via Sharp. L’orientation et les champs associés au nouveau fichier peuvent évoluer. Ce MVP n’a pas été vérifié avec tous les profils ICC ni toutes les métadonnées propriétaires.
 - JPEG réencodé à qualité 100, sous-échantillonnage 4:4:4. **Une identité des pixels hors watermark dans le JPEG exporté n’est pas garantie** à cause du réencodage avec perte. Le moteur conserve ces pixels avant compression pour les JPEG sRGB testés.
 - L’aperçu interactif utilise les images réduites et la composition du navigateur ; le moteur d’export effectue la composition à la résolution native.
-- Maximum 100 millions de pixels par image, 100 photos par lot. Les formats TIFF, PNG photo, WebP, BMP, RAW, watermark texte/SVG, variantes et presets ne sont pas encore pris en charge.
+- Maximum 100 millions de pixels par image, 1000 photos par lot. Les formats TIFF, PNG photo, WebP, BMP, RAW, watermark texte/SVG, variantes et presets ne sont pas encore pris en charge.
 - Interface et logique portables Windows/macOS/Linux ; seul le paquet Windows a été exécuté et vérifié ici. Construire les paquets macOS/Linux sur leurs plateformes respectives.
 
 ## Développement et vérifications

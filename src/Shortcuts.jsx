@@ -1,8 +1,9 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
+import {geometry} from '../lib/placement.cjs';
 import './shortcuts.css';
 
-const shortcuts=[['← / →','Photo précédente / suivante'],['G / E','Galerie / photo en grand'],['Espace','Aperçu plein écran avec watermark'],['Échap','Fermer l’aperçu / revenir à la galerie'],['Entrée','Valider le placement de la photo du lot'],['F','Marquer / retirer la marque de la photo'],['Ctrl / ⌘ + O','Ouvrir une photo'],['Ctrl / ⌘ + Maj + O','Importer plusieurs photos'],['Ctrl / ⌘ + E','Exporter dans le module actif'],['?','Afficher les raccourcis']];
+const shortcuts=[['← / →','Photo précédente / suivante'],['G / E','Galerie / photo en grand'],['Espace','Aperçu plein écran avec watermark'],['Échap','Fermer l’aperçu / revenir à la galerie'],['Entrée','Valider et passer à la photo suivante'],['F','Marquer / retirer la marque de la photo'],['Ctrl / ⌘ + O','Ouvrir une photo'],['Ctrl / ⌘ + Maj + O','Importer plusieurs photos'],['Ctrl / ⌘ + E','Exporter dans le module actif'],['?','Afficher les raccourcis']];
 const editing=target=>target?.isContentEditable||target?.closest?.('input,textarea,select,[role="slider"],[contenteditable="true"]');
 
 export default function Shortcuts({photo,mark,value,batch,busy,visible=true,onValidate,onOpen,onImport,onExport,onSelectPhoto,onFlag,onGallery,onPhoto,onEscapeGallery,canExport=true}){
@@ -43,14 +44,13 @@ export default function Shortcuts({photo,mark,value,batch,busy,visible=true,onVa
   return()=>window.removeEventListener('keydown',onKey);
  },[visible,modal,help,preview,busy,batch,index,count,photo,mark,onOpen,onImport,onExport,onSelectPhoto,onValidate,onFlag,onGallery,onPhoto,onEscapeGallery,canExport]);
  const inverted=value.inverted??!!mark?.inverted,filter=inverted!==!!mark?.inverted?'invert(1)':'none';
- const width=photo&&mark?Math.max(1,Math.round(value.width*photo.width)):0;
- const height=mark?Math.max(1,Math.round(width*mark.height/mark.width)):0;
+ const box=geometry(value,photo,mark);
  const move=offset=>{const item=batch.items[index+offset];if(item&&!busy&&!batch.running)onSelectPhoto?.(item.id);};
  return <>
   <div className="shortcut-actions"><button className="quiet shortcut-preview" disabled={!photo||!!busy||batch.running} onClick={()=>setPreview(true)} title="Aperçu plein écran (Espace)">⛶ Aperçu</button><button className="quiet shortcut-help" title="Raccourcis clavier (?)" onClick={()=>setHelp(true)}>⌨ Raccourcis</button></div>
   {modal&&createPortal(<div ref={dialog} className={`shortcut-modal ${preview?'fullscreen-preview':'shortcut-help-dialog'}`} role="dialog" aria-modal="true" aria-label={preview?'Aperçu plein écran avec watermark':'Raccourcis clavier'}>
    <button className="shortcut-close secondary" onClick={()=>{setPreview(false);setHelp(false);}} aria-label="Fermer l’aperçu ou l’aide">Fermer · Échap</button>
-   {preview&&photo?<><div className="fullscreen-photo-stage" style={{aspectRatio:`${photo.width}/${photo.height}`,'--photo-ratio':photo.width/photo.height}}><img className="fullscreen-photo" src={photo.preview} alt={photo.name} draggable="false"/>{mark&&<img className="fullscreen-watermark" src={mark.preview} alt="Watermark" draggable="false" style={{left:`${Math.round(value.x*photo.width)/photo.width*100}%`,top:`${Math.round(value.y*photo.height)/photo.height*100}%`,width:`${width/photo.width*100}%`,height:`${height/photo.height*100}%`,opacity:value.opacity,filter}}/>}</div>{count>1&&<div className="fullscreen-navigation"><button className="fullscreen-previous" aria-label="Photo précédente" disabled={!!busy||batch.running||index<=0} onClick={()=>move(-1)}>‹</button><button className="fullscreen-next" aria-label="Photo suivante" disabled={!!busy||batch.running||index<0||index>=count-1} onClick={()=>move(1)}>›</button></div>}<div className="fullscreen-caption"><strong>{photo.name}</strong><span>{count>1?`${index+1} / ${count} · `:''}← → Naviguer · Espace / Échap Fermer</span></div></>:<section className="shortcut-sheet"><h2>Raccourcis clavier</h2><p>Disponibles en dehors des champs de saisie.</p><dl>{shortcuts.map(([key,label])=><div key={key}><dt><kbd>{key}</kbd></dt><dd>{label}</dd></div>)}</dl></section>}
+   {preview&&photo?<><div className="fullscreen-photo-stage" style={{aspectRatio:`${photo.width}/${photo.height}`,'--photo-ratio':photo.width/photo.height}}><img className="fullscreen-photo" src={photo.preview} alt={photo.name} draggable="false"/>{box&&<img className="fullscreen-watermark" src={mark.preview} alt="Watermark" draggable="false" style={{left:`${box.left/photo.width*100}%`,top:`${box.top/photo.height*100}%`,width:`${box.width/photo.width*100}%`,height:`${box.height/photo.height*100}%`,opacity:value.opacity,filter}}/>}</div>{count>1&&<div className="fullscreen-navigation"><button className="fullscreen-previous" aria-label="Photo précédente" disabled={!!busy||batch.running||index<=0} onClick={()=>move(-1)}>‹</button><button className="fullscreen-next" aria-label="Photo suivante" disabled={!!busy||batch.running||index<0||index>=count-1} onClick={()=>move(1)}>›</button></div>}<div className="fullscreen-caption"><strong>{photo.name}</strong><span>{count>1?`${index+1} / ${count} · `:''}← → Naviguer · Espace / Échap Fermer</span></div></>:<section className="shortcut-sheet"><h2>Raccourcis clavier</h2><p>Disponibles en dehors des champs de saisie.</p><dl>{shortcuts.map(([key,label])=><div key={key}><dt><kbd>{key}</kbd></dt><dd>{label}</dd></div>)}</dl></section>}
   </div>,document.body)}
  </>;
 }
