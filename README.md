@@ -1,4 +1,4 @@
-# Watermark Studio — v0.4.1 locale
+# Watermark Studio — v0.4.2 locale
 
 Application de bureau Electron + React. Une ou plusieurs photos **JPEG** et un watermark **PNG réellement transparent**. Ollama analyse chaque photo et le watermark ; le moteur Sharp applique ensuite les coordonnées validées sans génération d’image.
 
