@@ -17,7 +17,6 @@ export function PhotoList({batch,busy,selectPhoto,reviewMode=false}){
 }
 export function PhotoNavigation({batch,busy,selectPhoto,visible=true}){
  const index=batch.items.findIndex(item=>item.id===batch.activeId),count=batch.items.length;
- useEffect(()=>{if(!visible||busy||count<2)return;function onKey(event){if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||event.target?.isContentEditable||event.target?.closest?.('input,textarea,select,[role="slider"]'))return;const next=event.key==='ArrowLeft'?index-1:event.key==='ArrowRight'?index+1:-1;if(next<0||next>=count)return;event.preventDefault();selectPhoto(batch.items[next].id);}window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);},[batch,visible,busy,index,count,selectPhoto]);
  if(count<2)return null;
  return <div className="photo-navigation" aria-label="Navigation dans la sélection"><button className="photo-previous" title="Photo précédente (flèche gauche)" aria-label="Photo précédente" disabled={!!busy||index<=0} onClick={()=>selectPhoto(batch.items[index-1].id)}>‹</button><span className="photo-counter" aria-live="polite">{index+1} / {count}</span><button className="photo-next" title="Photo suivante (flèche droite)" aria-label="Photo suivante" disabled={!!busy||index<0||index>=count-1} onClick={()=>selectPhoto(batch.items[index+1].id)}>›</button></div>;
 }

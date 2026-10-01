@@ -1,4 +1,4 @@
-# Watermark Studio — v0.5.0 locale
+# Watermark Studio — v0.6.0 locale
 
 Application de bureau Electron + React. Une ou plusieurs photos **JPEG** et un watermark **PNG réellement transparent**. Ollama analyse chaque photo et le watermark ; le moteur Sharp applique ensuite les coordonnées validées sans génération d’image.
 
@@ -13,6 +13,16 @@ Pour publier une version, mettre à jour `version` dans `package.json` et `packa
 Développement avec Node.js 22 : `npm ci`, `npm test`, `npm start`. Installer localement les formats de distribution avec `npm run dist` sur le système cible (ou `npm run dist -- --win --x64`, `--linux --x64`, `--mac --arm64`). `npm run pack` garde le mode dossier destiné aux essais locaux.
 
 Dans **La signature**, le bouton **Inverser les couleurs** transforme notamment une signature blanche en noire, sans modifier sa transparence, sa taille ou son placement. **Rétablir les couleurs** revient aux couleurs du PNG d’origine. Le choix est sauvegardé pour la photo courante et utilisé dans l’aperçu et à l’export. Une modification manuelle exige une nouvelle validation ; les fichiers source restent intacts.
+
+## Nouveautés v0.6 : galerie et placement manuel du lot
+
+**Placement sans IA** applique et valide une règle sur les photos affichées par les filtres : bord gauche ou droit, haut ou bas, marges, largeur, opacité et couleurs. Par défaut : 2,5 % depuis la gauche et 2,5 % depuis le bas. Les marges sont mesurées depuis le rectangle du watermark et calculées séparément pour chaque photo, à un pixel d’arrondi près. Le ratio est conservé et la taille réduite si nécessaire pour respecter les marges. Les photos exclues par les filtres restent inchangées.
+
+Le bouton **Galerie** ouvre une grille dans la zone centrale, à la place de la photo. Un clic sélectionne une photo ; un double-clic l’ouvre en grand. Chaque photo peut être marquée puis filtrée par marquage et/ou validation. Ces filtres s’appliquent à la navigation, au placement manuel, aux analyses par lot et à l’export. Les marques et filtres sont sauvegardés dans la session.
+
+Raccourcis hors des champs de saisie : **G** galerie, **E** photo, **← / →** navigation, **Espace** aperçu plein écran avec watermark, **Échap** fermer l’aperçu puis revenir à la galerie, **Entrée** valider le placement, **F** marquer, **Ctrl/⌘+O** ouvrir, **Ctrl/⌘+Maj+O** importer plusieurs photos, **Ctrl/⌘+E** exporter, **?** afficher l’aide.
+
+La zone photo garde une hauteur stable et des flèches fixes. Les réglages, explications et résultats se trouvent dans un panneau repliable à droite. Les contrôles indigo et turquoise s’inspirent des [palettes Radix](https://www.radix-ui.com/themes/docs/theme/color), sur un fond neutre pour préserver la lecture des photos.
 
 ## Nouveautés v0.5 : navigation et couleur suggérée
 
