@@ -38,7 +38,8 @@ jobs:
         if: github.event_name == 'release'
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: node -e "const v=require('./package.json').version; if(process.env.RELEASE_TAG!=='v'+v)throw new Error('Le tag doit correspondre a package.json : v'+v)"
+        run: |
+          node -e "const v=require('./package.json').version; if(process.env.RELEASE_TAG!=='v'+v)throw new Error('Le tag doit correspondre a package.json : v'+v)"
       - run: npm ci
       - run: npm test
       - name: Construire les installateurs
