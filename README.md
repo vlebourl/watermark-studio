@@ -1,4 +1,4 @@
-# Watermark Studio — v0.4.2 locale
+# Watermark Studio — v0.5.0 locale
 
 Application de bureau Electron + React. Une ou plusieurs photos **JPEG** et un watermark **PNG réellement transparent**. Ollama analyse chaque photo et le watermark ; le moteur Sharp applique ensuite les coordonnées validées sans génération d’image.
 
@@ -12,7 +12,15 @@ Pour publier une version, mettre à jour `version` dans `package.json` et `packa
 
 Développement avec Node.js 22 : `npm ci`, `npm test`, `npm start`. Installer localement les formats de distribution avec `npm run dist` sur le système cible (ou `npm run dist -- --win --x64`, `--linux --x64`, `--mac --arm64`). `npm run pack` garde le mode dossier destiné aux essais locaux.
 
-Dans **La signature**, le bouton **Inverser les couleurs** transforme notamment une signature blanche en noire, sans modifier sa transparence, sa taille ou son placement. **Rétablir les couleurs** revient au PNG d’origine. Le choix est sauvegardé et utilisé dans l’aperçu, par Ollama et à l’export, pour tout le lot. Les suggestions et validations précédentes sont réinitialisées puisque le contraste change ; les fichiers source restent intacts.
+Dans **La signature**, le bouton **Inverser les couleurs** transforme notamment une signature blanche en noire, sans modifier sa transparence, sa taille ou son placement. **Rétablir les couleurs** revient aux couleurs du PNG d’origine. Le choix est sauvegardé pour la photo courante et utilisé dans l’aperçu et à l’export. Une modification manuelle exige une nouvelle validation ; les fichiers source restent intacts.
+
+## Nouveautés v0.5 : navigation et couleur suggérée
+
+Les lots peuvent contenir **1000 photos**. Une vue de vignettes et des flèches gauche/droite sur la photo principale permettent de parcourir la sélection commune aux modules Watermark et Critique. Les touches gauche/droite fonctionnent aussi hors des champs de saisie. Les vignettes sont chargées progressivement, avec quatre requêtes simultanées maximum et des caches bornés.
+
+Ollama compare les couleurs originales du watermark et leur **inversion**, photo par photo, avec une justification du contraste en plus de celles de la position et de la taille. L'inversion conserve l'alpha et le ratio du PNG. Le choix reste modifiable avant validation ; le moteur déterministe applique le même choix à l'export. Le PNG source reste intact.
+
+Vérifications : 13 tests automatisés, parcours Electron `scripts/gallery-smoke.cjs` et essai Ollama réel avec choix de couleur, ajustement demandé et export.
 
 ## Nouveautés v0.4 : sélection commune et critique étayée
 

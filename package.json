@@ -1,6 +1,6 @@
 {
   "name": "watermark-studio",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "private": true,
   "description": "Local vision-assisted watermark desktop MVP",
   "author": {"name":"Vincent Le Bourlot","email":"5701372+vlebourl@users.noreply.github.com"},

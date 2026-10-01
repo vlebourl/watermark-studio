@@ -59,6 +59,9 @@ test('Inversion blanc/noir : alpha intact, aperçu et export cohérents, PNG sou
     const opaque=(35*400+45)*3,transparent=(55*400+155)*3;
     assert.deepEqual([...white.subarray(opaque,opaque+3)],[255,255,255]);
     assert.deepEqual([...black.subarray(opaque,opaque+3)],[0,0,0]);
+    const perPhoto=await render(f.photo,f.mark,{...value,inverted:true},true);
+    assert.deepEqual(perPhoto,await render(f.photo,inverted,value,true));
+    assert.deepEqual(await render(f.photo,inverted,{...value,inverted:false},true),await render(f.photo,f.mark,value,true));
     assert.deepEqual(black.subarray(transparent,transparent+3),white.subarray(transparent,transparent+3));
     assert.deepEqual(await fs.readFile(f.mark.path),source);
   }finally{await fs.rm(f.dir,{recursive:true,force:true});}
