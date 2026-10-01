@@ -1,0 +1,26 @@
+const {app,BrowserWindow,dialog}=require('electron');
+const fs=require('node:fs/promises'),path=require('node:path'),assert=require('node:assert/strict');
+app.disableHardwareAcceleration();app.setPath('userData',path.resolve('test-output/inversion-ui-session'));
+dialog.showOpenDialog=async(_window,options)=>({canceled:false,filePaths:[path.resolve(options.properties.includes('openDirectory')?'test-output':options.filters[0].extensions.includes('png')?'test-output/signature.png':'test-output/demo.jpg')]});
+require('../electron/main.cjs');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  await app.whenReady();const win=BrowserWindow.getAllWindows()[0];
+  await new Promise(r=>win.webContents.once('did-finish-load',r));await wait(700);
+  const js=s=>win.webContents.executeJavaScript(s);
+  await js(`document.querySelector('.workspace .selection-pick').click()`);await wait(500);
+  await js(`document.querySelector('.workspace .file-card:not(.selection-pick)').click()`);await wait(500);
+  const before=await js(`document.querySelector('.mark-sample img').src`);
+  await js(`document.querySelector('.invert-mark').click()`);await wait(600);
+  assert.equal(await js(`document.querySelector('.invert-mark').getAttribute('aria-pressed')`),'true');
+  const after=await js(`document.querySelector('.mark-sample img').src`);assert.notEqual(after,before);
+  assert.equal(await js(`document.querySelector('.overlay').src`),after);
+  const saved=JSON.parse(await fs.readFile(path.join(app.getPath('userData'),'session.json'),'utf8'));
+  assert.equal(saved.markInverted,true);
+  const result=await js(`window.studio.export({x:.1,y:.1,width:.2,opacity:1})`);assert.equal(result.ok,true);
+  const restored=await js(`window.studio.restore()`);assert.equal(restored.data.mark.inverted,true);assert.equal(restored.data.mark.preview,after);
+  await js(`document.querySelector('.invert-mark').click()`);await wait(500);
+  assert.equal(await js(`document.querySelector('.mark-sample img').src`),before);
+  await fs.writeFile('test-output/inversion-ui-report.json',JSON.stringify({ok:true,export:result.data,preview:true,restore:true,reversible:true},null,2));
+  app.quit();
+})().catch(error=>{console.error(error);app.exit(1);});

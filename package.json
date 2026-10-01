@@ -1,0 +1,58 @@
+{
+  "name": "watermark-studio",
+  "version": "0.4.1",
+  "private": true,
+  "description": "Local vision-assisted watermark desktop MVP",
+  "author": {"name":"Vincent Le Bourlot","email":"5701372+vlebourl@users.noreply.github.com"},
+  "repository": {"type":"git","url":"https://github.com/vlebourl/watermark-studio.git"},
+  "main": "electron/main.cjs",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "start": "npm run build && electron .",
+    "test": "node --test tests/*.test.cjs",
+    "pack": "npm run build && node scripts/pack.cjs",
+    "dist": "npm run build && electron-builder --publish never"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2"
+  },
+  "build": {
+    "appId": "local.watermark.studio",
+    "productName": "Watermark Studio",
+    "directories": {"output":"release","buildResources":"assets"},
+    "artifactName": "Watermark-Studio-${version}-${os}-${arch}.${ext}",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "lib/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/sharp/**/*",
+      "node_modules/@img/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "signExecutable": false
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.png",
+      "identity": null,
+      "category": "public.app-category.photography"
+    },
+    "linux": {
+      "target": ["AppImage","deb"],
+      "icon": "assets/icon.png",
+      "category": "Graphics"
+    }
+  }
+}

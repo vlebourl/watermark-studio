@@ -1,0 +1,12 @@
+node_modules/
+.tools/
+dist/
+release/
+test-output/
+*.log
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+.DS_Store

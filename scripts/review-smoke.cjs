@@ -1,0 +1,23 @@
+const {app,BrowserWindow,dialog}=require('electron'),fs=require('node:fs/promises'),path=require('node:path');
+app.disableHardwareAcceleration();app.setPath('userData',path.resolve('test-output/review-ui-session'));
+dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path.resolve('test-output/demo.jpg')]});
+dialog.showSaveDialog=async()=>({canceled:false,filePath:path.resolve('test-output/review-report.json')});
+require('../electron/main.cjs');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{await app.whenReady();const win=BrowserWindow.getAllWindows()[0];await new Promise(r=>win.webContents.once('did-finish-load',r));await wait(800);const js=s=>win.webContents.executeJavaScript(s);
+ const until=async condition=>{for(let i=0;i<300;i++){await wait(500);const error=await js(`document.querySelector('.review-content .error')?.textContent`);if(error)throw new Error(error);if(await js(condition))return;}throw new Error('Timeout: '+condition);};
+ await js(`document.querySelectorAll('.module-tabs button')[1].click()`);await wait(100);
+ const modules=await js(`({tabs:Array.from(document.querySelectorAll('.module-tabs button')).map(e=>({text:e.textContent,active:e.classList.contains('active')})),reviewDisplay:getComputedStyle(document.querySelector('.review-workspace')).display,watermarkDisplay:getComputedStyle(document.querySelector('.workspace')).display})`);console.log(JSON.stringify(modules));if(modules.reviewDisplay==='none'||modules.watermarkDisplay!=='none'||!modules.tabs[1].active)throw new Error('Navigation de modules invalide');
+ if(process.argv.includes('--restore-check')){await until(`document.querySelector('.global-score').textContent.includes('/10')&&document.querySelector('[data-criterion=focus] p').textContent!=='La justification apparaîtra après l’évaluation.'`);const restored=await js(`({score:document.querySelector('.global-score').textContent,weights:Array.from(document.querySelectorAll('.weight-row input[type=number]')).map(e=>e.value),reasons:Array.from(document.querySelectorAll('.criterion-card p')).map(e=>e.textContent)})`);if(restored.weights[2]!=='10'||restored.weights.some((w,i)=>i!==2&&w!=='0'))throw new Error('Poids non restaurés');await fs.writeFile('test-output/review-restore.json',JSON.stringify(restored,null,2));app.quit();return;}
+ // Set a deterministic known local model for the smoke test only.
+ await js(`(()=>{const e=document.querySelector('.review-sidebar .model-row input'),set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;set.call(e,${JSON.stringify(process.env.WATERMARK_TEST_MODEL||'qwen3-vl:30b-a3b-instruct')});e.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+ await js(`document.querySelector('.review-sidebar .selection-pick').click()`);await wait(700);await js(`document.querySelector('.review-analyze').click()`);
+ await until(`document.querySelector('[data-criterion=focus] p').textContent!=='La justification apparaîtra après l’évaluation.'&&!document.querySelector('.review-analyze').disabled`);
+ const first=await js(`({score:document.querySelector('.global-score').textContent,criteria:Array.from(document.querySelectorAll('.criterion-card')).map(e=>({key:e.dataset.criterion,score:e.querySelector('strong').textContent,reason:e.querySelector('p').textContent})),model:document.querySelector('.evaluation-meta').textContent})`);if(first.criteria.length!==6||first.criteria.some(c=>!c.reason))throw new Error('Critères incomplets');
+ // Change all six weights using the real React input event path. Only focus remains active.
+ await js(`(()=>{const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;document.querySelectorAll('.weight-row input[type=number]').forEach((input,i)=>{setter.call(input,i===2?'10':'0');input.dispatchEvent(new Event('input',{bubbles:true}));});})()`);await wait(600);
+ const weighted=await js(`document.querySelector('.global-score').textContent`);const focus=first.criteria.find(c=>c.key==='focus').score;if(weighted.replace(/\s/g,'')!==focus.replace(/\s/g,''))throw new Error('Moyenne pondérée incorrecte '+weighted+' / '+focus);
+ await js(`document.querySelector('.review-heading button').click()`);await until(`document.querySelector('.review-content [role=status]')?.textContent.includes('Rapport enregistré')`);
+ try{await fs.writeFile('test-output/review-ui.png',(await win.webContents.capturePage()).toPNG());}catch(error){first.captureError=error.message;}
+ await fs.writeFile('test-output/review-ui-report.json',JSON.stringify({...first,weighted},null,2));await wait(700);app.quit();
+})().catch(async error=>{await fs.writeFile('test-output/review-ui-error.txt',error.stack);app.exit(1);});
