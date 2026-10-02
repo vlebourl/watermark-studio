@@ -1,4 +1,4 @@
-# Watermark Studio — v0.6.0 locale
+# Watermark Studio — v0.7.0
 
 Application de bureau Electron + React. Une ou plusieurs photos **JPEG** et un watermark **PNG réellement transparent**. Ollama analyse chaque photo et le watermark ; le moteur Sharp applique ensuite les coordonnées validées sans génération d’image.
 
@@ -14,7 +14,7 @@ Développement avec Node.js 22 : `npm ci`, `npm test`, `npm start`. Installer lo
 
 Dans le panneau de placement à droite, **Inverser les couleurs** transforme notamment une signature blanche en noire, sans modifier sa transparence, sa taille ou son placement. Le choix est sauvegardé pour la photo courante et utilisé dans l’aperçu et à l’export. Une modification manuelle exige une nouvelle validation ; les fichiers source restent intacts.
 
-## Éditeur unifié — changements en cours
+## Nouveautés v0.7 : éditeur unifié et magnétisme
 
 Le panneau de droite regroupe le placement individuel et son application au lot filtré : références gauche/droite et haut/bas, marges et largeur éditables en pixels et en pourcentage, inversion et opacité. Les deux unités restent synchronisées. Pour le lot, choisir des proportions adaptées aux dimensions de chaque photo ou des valeurs fixes en pixels. Les photos exclues par les filtres restent inchangées.
 
